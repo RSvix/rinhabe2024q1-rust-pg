@@ -36,6 +36,27 @@ $$;
 CREATE PROCEDURE atualizar_saldo(v1 INT, i INT, v2 INT, t CHAR, d VARCHAR(10))
     LANGUAGE SQL
     BEGIN ATOMIC
-    UPDATE saldos SET valor = v1 WHERE cliente_id = i;
+    UPDATE saldos SET valor = valor + v1 WHERE cliente_id = i;
     INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES (i, v2, t, d);
 END;
+
+
+-- CREATE FUNCTION atualizar_teste(v1 INT, i INT, v2 INT, t CHAR, d VARCHAR(10), l INT, OUT r INT, OUT s INT)
+-- LANGUAGE plpgsql 
+-- AS $$
+-- DECLARE saldo_atual INT;
+-- DECLARE saldo_atualizado INT;
+-- BEGIN
+--     SELECT saldos.valor into saldo_atual from saldos where cliente_id = i FOR UPDATE;
+--     IF (saldo_atual - v2) < (l * -1) THEN
+--         r := 0;
+--         s := saldo_atual;
+--     ELSE
+--         UPDATE saldos SET valor = valor + v1 WHERE cliente_id = i RETURNING valor AS saldo_atualizado;
+--         INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES (i, v2, t, d);
+--         r := 1;
+--         s := saldo_atualizado;
+--     END IF;
+--     RETURN;
+-- END;
+-- $$;

@@ -46,54 +46,6 @@ async fn transacoes(req: HttpRequest, req_body: web::Json<models::TransacoesReqB
     let tipo_lower = req_body.tipo.to_lowercase();
     let limite = HASHMAP.get(&client_id).unwrap_or(&0);
 
-    // match sqlx::query("SELECT valor FROM saldos WHERE cliente_id=$1 FOR UPDATE;")
-    //     .bind(client_id)
-    //     .map(|row: PgRow| models::ValorSaldo {
-    //         saldo_atual: row.get("valor")
-    //     })
-    //     .fetch_one(&app_state.db_pool)
-    //     .await
-    //     {
-    //         Ok(r) => {
-    //             let mut valor_transacao = req_body.valor;
-    //             if tipo_lower == "d" {
-    //                 if (r.saldo_atual - req_body.valor) < (limite * -1) {
-    //                     return HttpResponse::UnprocessableEntity().finish();
-    //                 }
-    //                 valor_transacao = req_body.valor * -1;
-    //             }
-
-    //             match sqlx::query("INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES ($1,$2,$3,$4);")
-    //                 .bind(client_id)
-    //                 .bind(req_body.valor)
-    //                 .bind(tipo_lower)
-    //                 .bind(req_body.descricao.to_owned())
-    //                 .execute(&app_state.db_pool)
-    //                 .await
-    //                 {
-    //                     Ok(_) => (),
-    //                     Err(e) => println!("Error 1: {:?}", e),
-    //                 }
-    
-    //             match sqlx::query("UPDATE saldos SET valor = valor + $1 WHERE cliente_id=$2;")
-    //                 .bind(valor_transacao)
-    //                 .bind(client_id)
-    //                 .execute(&app_state.db_pool)
-    //                 .await
-    //                 {
-    //                     Ok(_) => {
-    //                         let resp = models::TransacoesResp {
-    //                             limite: *limite,
-    //                             saldo: (r.saldo_atual + valor_transacao),
-    //                         };
-    //                         return HttpResponse::Ok().json(resp)
-    //                     },
-    //                     Err(_) => return HttpResponse::UnprocessableEntity().finish(),
-    //                 }
-    //         },
-    //         Err(e) => return HttpResponse::UnprocessableEntity().body(e.to_string()),
-    //     }
-
     match sqlx::query("SELECT valor FROM saldos WHERE cliente_id=$1 FOR UPDATE;")
         .bind(client_id)
         .map(|row: PgRow| models::ValorSaldo {
