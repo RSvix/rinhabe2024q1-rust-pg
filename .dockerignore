@@ -1,4 +1,5 @@
-target
+/target
+/images
 Dockerfile
 .dockerignore
 .git
