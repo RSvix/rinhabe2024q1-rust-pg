@@ -103,7 +103,7 @@ async fn transacoes(req: HttpRequest, req_body: web::Json<models::TransacoesReqB
         .bind(tipo_lower)
         .bind(req_body.descricao.to_owned())
         .bind(limite)
-        .map(|row: PgRow| models::Teste1 {
+        .map(|row: PgRow| models::RetornoFuncDB {
             status: row.get("st"),
             saldo: row.get("sa"),
         })
@@ -111,8 +111,14 @@ async fn transacoes(req: HttpRequest, req_body: web::Json<models::TransacoesReqB
         .await
         {
             Ok(r) => {
-                println!("resp db: {} - {}", r.status, r.saldo);
-                return HttpResponse::Ok().finish()
+                if r.status == 0 {
+                    return HttpResponse::UnprocessableEntity().finish();
+                }
+                let resp = models::TransacoesResp {
+                    limite: *limite,
+                    saldo: r.saldo,
+                };
+                return HttpResponse::Ok().json(resp)
             },
             Err(e) => {
                 println!("err: {}", e);

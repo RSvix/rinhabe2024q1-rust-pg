@@ -70,7 +70,7 @@ pub struct ValorSaldo {
 
 
 #[derive(Debug, FromRow)]
-pub struct Teste1 {
+pub struct RetornoFuncDB {
 	pub status: i32,
     pub saldo: i32
 }
