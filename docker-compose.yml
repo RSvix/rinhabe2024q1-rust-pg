@@ -6,10 +6,10 @@ version: '3.5'
 
 services:
   api01: &api
-    # image: rsvix/rinhabackend:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: rsvix/api-rinha2024-q1:1.0
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     container_name: api01
     restart: unless-stopped
     environment:
