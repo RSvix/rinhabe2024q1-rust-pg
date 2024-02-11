@@ -41,16 +41,39 @@ CREATE PROCEDURE atualizar_saldo(v1 INT, i INT, v2 INT, t CHAR, d VARCHAR(10))
 END;
 
 
-CREATE FUNCTION atualizar_teste(v1 INT, i INT, v2 INT, t CHAR, d VARCHAR(10), l INT, OUT st INT, OUT sa INT)
+CREATE FUNCTION atualizar_credito(v1 INT, i INT, v2 INT, t CHAR, d VARCHAR(10), l INT, OUT st INT, OUT sa INT)
+LANGUAGE plpgsql 
+AS $$
+DECLARE saldo_atualizado INT;
+BEGIN
+    UPDATE saldos SET valor = valor + v1 WHERE cliente_id = i;
+    SELECT saldos.valor into saldo_atualizado from saldos where cliente_id = i;
+    INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES (i, v2, t, d);
+    st := 1;
+    sa := saldo_atualizado;
+    RETURN;
+END;
+$$;
+
+CREATE FUNCTION atualizar_debito(v1 INT, i INT, v2 INT, t CHAR, d VARCHAR(10), l INT, OUT st INT, OUT sa INT)
 LANGUAGE plpgsql 
 AS $$
 DECLARE saldo_atual INT;
 DECLARE saldo_atualizado INT;
 BEGIN
     SELECT saldos.valor into saldo_atual from saldos where cliente_id = i FOR UPDATE;
-    IF (saldo_atual - v2) < (l * -1) THEN
-        st := 0;
-        sa := saldo_atual;
+    IF t = 'd' THEN
+        IF (saldo_atual - v2) < (l * -1) THEN
+            st := 0;
+            sa := saldo_atual;
+            RETURN;
+        ELSE
+            UPDATE saldos SET valor = valor + v1 WHERE cliente_id = i;
+            SELECT saldos.valor into saldo_atualizado from saldos where cliente_id = i;
+            INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES (i, v2, t, d);
+            st := 1;
+            sa := saldo_atualizado;
+        END IF;
     ELSE
         UPDATE saldos SET valor = valor + v1 WHERE cliente_id = i;
         SELECT saldos.valor into saldo_atualizado from saldos where cliente_id = i;

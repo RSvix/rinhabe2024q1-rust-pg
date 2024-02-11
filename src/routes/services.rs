@@ -96,7 +96,7 @@ async fn transacoes(req: HttpRequest, req_body: web::Json<models::TransacoesReqB
     if tipo_lower == "d" {
         valor_transacao = req_body.valor * -1;
     }
-    match sqlx::query("SELECT * FROM \"atualizar_teste\"($1, $2, $3, $4, $5, $6)")
+    match sqlx::query("SELECT * FROM \"atualizar_debito\"($1, $2, $3, $4, $5, $6)")
         .bind(valor_transacao)
         .bind(client_id)
         .bind(req_body.valor)
