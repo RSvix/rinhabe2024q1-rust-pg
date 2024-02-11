@@ -2,8 +2,6 @@ version: '3.5'
 
 # docker compose build
 # docker compose up
-# docker system df
-# docker system prune
 # curl http://localhost:9999/db-reset
 
 services:
