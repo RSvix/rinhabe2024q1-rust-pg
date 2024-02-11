@@ -46,46 +46,78 @@ async fn transacoes(req: HttpRequest, req_body: web::Json<models::TransacoesReqB
     let tipo_lower = req_body.tipo.to_lowercase();
     let limite = HASHMAP.get(&client_id).unwrap_or(&0);
 
-    match sqlx::query("SELECT valor FROM saldos WHERE cliente_id=$1 FOR UPDATE;")
+    // ---------------------------------------------------------------------------------------- V1
+
+    // match sqlx::query("SELECT valor FROM saldos WHERE cliente_id=$1 FOR UPDATE;")
+    //     .bind(client_id)
+    //     .map(|row: PgRow| models::ValorSaldo {
+    //         saldo_atual: row.get("valor")
+    //     })
+    //     .fetch_one(&app_state.db_pool)
+    //     .await
+    //     {
+    //         Ok(r) => {
+    //             let mut valor_transacao = req_body.valor;
+    //             if tipo_lower == "d" {
+    //                 if (r.saldo_atual - req_body.valor) < (limite * -1) {
+    //                     return HttpResponse::UnprocessableEntity().finish();
+    //                 }
+    //                 valor_transacao = req_body.valor * -1;
+    //             }
+
+    //             match sqlx::query("CALL atualizar_saldo($1, $2, $3, $4, $5)")
+    //                 .bind(valor_transacao)
+    //                 .bind(client_id)
+    //                 .bind(req_body.valor)
+    //                 .bind(tipo_lower)
+    //                 .bind(req_body.descricao.to_owned())
+    //                 .execute(&app_state.db_pool)
+    //                 .await
+    //                 {
+    //                     Ok(_) => {
+    //                         let resp = models::TransacoesResp {
+    //                             limite: *limite,
+    //                             saldo: (r.saldo_atual + valor_transacao),
+    //                         };
+    //                         return HttpResponse::Ok().json(resp)
+    //                     },
+    //                     Err(e) => {
+    //                         println!("err: {}", e);
+    //                         return HttpResponse::UnprocessableEntity().finish()
+    //                     },
+    //                 }
+    //         },
+    //         Err(e) => return HttpResponse::UnprocessableEntity().body(e.to_string()),
+    //     }
+
+    // ---------------------------------------------------------------------------------------- V2
+
+    let mut valor_transacao = req_body.valor;
+    if tipo_lower == "d" {
+        valor_transacao = req_body.valor * -1;
+    }
+    match sqlx::query("SELECT * FROM \"atualizar_teste\"($1, $2, $3, $4, $5, $6)")
+        .bind(valor_transacao)
         .bind(client_id)
-        .map(|row: PgRow| models::ValorSaldo {
-            saldo_atual: row.get("valor")
+        .bind(req_body.valor)
+        .bind(tipo_lower)
+        .bind(req_body.descricao.to_owned())
+        .bind(limite)
+        .map(|row: PgRow| models::Teste1 {
+            status: row.get("st"),
+            saldo: row.get("sa"),
         })
         .fetch_one(&app_state.db_pool)
         .await
         {
             Ok(r) => {
-                let mut valor_transacao = req_body.valor;
-                if tipo_lower == "d" {
-                    if (r.saldo_atual - req_body.valor) < (limite * -1) {
-                        return HttpResponse::UnprocessableEntity().finish();
-                    }
-                    valor_transacao = req_body.valor * -1;
-                }
-
-                match sqlx::query("CALL atualizar_saldo($1, $2, $3, $4, $5)")
-                    .bind(valor_transacao)
-                    .bind(client_id)
-                    .bind(req_body.valor)
-                    .bind(tipo_lower)
-                    .bind(req_body.descricao.to_owned())
-                    .execute(&app_state.db_pool)
-                    .await
-                    {
-                        Ok(_) => {
-                            let resp = models::TransacoesResp {
-                                limite: *limite,
-                                saldo: (r.saldo_atual + valor_transacao),
-                            };
-                            return HttpResponse::Ok().json(resp)
-                        },
-                        Err(e) => {
-                            println!("err: {}", e);
-                            return HttpResponse::UnprocessableEntity().finish()
-                        },
-                    }
+                println!("resp db: {} - {}", r.status, r.saldo);
+                return HttpResponse::Ok().finish()
             },
-            Err(e) => return HttpResponse::UnprocessableEntity().body(e.to_string()),
+            Err(e) => {
+                println!("err: {}", e);
+                return HttpResponse::UnprocessableEntity().finish()
+            },
         }
 }
 

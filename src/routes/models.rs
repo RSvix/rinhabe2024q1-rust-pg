@@ -68,6 +68,13 @@ pub struct ValorSaldo {
 	pub saldo_atual: i32
 }
 
+
+#[derive(Debug, FromRow)]
+pub struct Teste1 {
+	pub status: i32,
+    pub saldo: i32
+}
+
 // ------------------------------------------------------------------------------------------------ 
 
 fn validate_type(tipo: &str) -> Result<(), ValidationError> {
