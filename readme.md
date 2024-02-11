@@ -11,7 +11,7 @@
 - Banco: `Postgresql`
 
 ## Repositório da API
-- https://github.com/RSvix/rinhabackend2024q1rust
+- https://github.com/RSvix/rinhabe2024q1-rust-pg
 
 ## Repositório da rinha
 - https://github.com/zanfranceschi/rinha-de-backend-2024-q1/tree/main
