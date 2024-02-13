@@ -47,10 +47,10 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_BACKTRACE", "1");
     env_logger::init();
 
-    let database_url = env::var("DATABASE_URL").expect("postgres://admin:123@localhost:5432/postgres");
-    let http_port = env::var("HTTP_PORT").expect("8080").parse::<u16>().unwrap();
-    let pool_size = env::var("POOL_SIZE").expect("20").parse::<u32>().unwrap();
-    let actix_workers = env::var("ACTIX_WORKERS").expect("1").parse::<usize>().unwrap();
+    let database_url = env::var("DATABASE_URL").unwrap_or("postgres://admin:123@localhost:5432/postgres");
+    let http_port = env::var("HTTP_PORT").unwrap_or("8080").parse::<u16>().unwrap();
+    let pool_size = env::var("POOL_SIZE").unwrap_or("20").parse::<u32>().unwrap();
+    let actix_workers = env::var("ACTIX_WORKERS").unwrap_or("1").parse::<usize>().unwrap();
 
 	let pool: sqlx::Pool<sqlx::Postgres> = PgPoolOptions::new()
 		.max_connections(pool_size)
