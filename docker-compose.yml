@@ -1,10 +1,5 @@
 version: '3.5'
 
-# docker compose build
-# docker compose up
-# curl http://localhost:9999/db-reset
-# curl http://localhost:9999/clientes/1/extrato
-
 services:
   api01: &api
     # image: rsvix/api-rinha2024-q1:1.0
