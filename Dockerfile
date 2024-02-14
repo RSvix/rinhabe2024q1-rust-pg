@@ -15,6 +15,3 @@ WORKDIR /app
 COPY --from=builder app/target/release/rinha2024q1rust ./
 EXPOSE 8080
 CMD ["./rinha2024q1rust"]
-
-# docker build -t rinhateste .
-# docker run rinhateste:latest
