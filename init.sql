@@ -19,6 +19,9 @@ CREATE TABLE saldos (
     valor INTEGER NOT NULL
 );
 
+CREATE INDEX index_cliente_id ON transacoes(cliente_id);
+CREATE INDEX index_realizada_em ON transacoes(realizada_em DESC);
+
 ---------- INSERTS
 
 DO $$
@@ -37,32 +40,37 @@ $$;
 
 ---------- PROCEDURES
 
-CREATE PROCEDURE atualizar_saldo(v1 INT, i INT, v2 INT, t CHAR, d VARCHAR(10))
+CREATE PROCEDURE reset_db()
     LANGUAGE SQL
     BEGIN ATOMIC
-    UPDATE saldos SET valor = valor + v1 WHERE cliente_id = i;
-    INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES (i, v2, t, d);
+    UPDATE saldos SET valor = 0;
+    SELECT 'TRUNCATE TABLE transacoes';
 END;
 
 ---------- FUNCTIONS
 
-CREATE FUNCTION realizar_transacao(v1 INT, i INT, v2 INT, t CHAR, d VARCHAR(10), l INT, OUT st INT, OUT sa INT)
+CREATE FUNCTION realizar_transacao(v1 INT, i INT, v2 INT, t CHAR, d VARCHAR(10), l INT, OUT sa INT)
 LANGUAGE plpgsql 
 AS $$
 DECLARE saldo_atual INT;
-DECLARE saldo_atualizado INT;
 BEGIN
-    SELECT saldos.valor into saldo_atual from saldos where cliente_id = i FOR UPDATE;
+    SELECT saldos.valor INTO saldo_atual FROM saldos WHERE cliente_id = i FOR UPDATE;
     IF t = 'd' AND (saldo_atual - v2) < (l * -1) THEN
-        st := 0;
-        sa := 0;
-        RETURN;
+        RAISE EXCEPTION 'saldo insuficiente';
     END IF;
     UPDATE saldos SET valor = valor + v1 WHERE cliente_id = i;
-    saldo_atualizado := saldo_atual + v1;
     INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES (i, v2, t, d);
-    st := 1;
-    sa := saldo_atualizado;
+    sa := saldo_atual + v1;
     RETURN;
+END;
+$$;
+
+CREATE FUNCTION obter_extrato(i INT) RETURNS TABLE (valor INT, tipo CHAR, descricao VARCHAR(10), realizada_em TIMESTAMP, saldo INT)
+LANGUAGE plpgsql 
+AS $$
+DECLARE saldo_atual INT;
+BEGIN
+    SELECT saldos.valor INTO saldo_atual FROM saldos WHERE cliente_id = i FOR UPDATE;
+    RETURN QUERY SELECT transacoes.valor, transacoes.tipo, transacoes.descricao, transacoes.realizada_em, saldo_atual FROM transacoes WHERE cliente_id=$1 ORDER BY realizada_em DESC LIMIT 10;
 END;
 $$;

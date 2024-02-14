@@ -64,14 +64,7 @@ pub struct ExtratoDB {
 // ------------------------------------------------------------------------------------------------ 
 
 #[derive(Debug, FromRow)]
-pub struct ValorSaldo {
-	pub saldo_atual: i32
-}
-
-
-#[derive(Debug, FromRow)]
-pub struct RetornoFuncDB {
-	pub status: i32,
+pub struct RetornoRealizarTransacao {
     pub saldo: i32
 }
 
